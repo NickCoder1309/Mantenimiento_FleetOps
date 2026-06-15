@@ -36,7 +36,6 @@ func NewRouter(
 	r.Use(chimiddleware.RequestID)
 	r.Use(chimiddleware.RealIP)
 	r.Use(middleware.Recovery(logger))
-	r.Use(middleware.Logging(logger))
 
 	// Health check — outside versioned API
 	r.Get("/health", healthHandler.Check)
