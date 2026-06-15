@@ -36,7 +36,7 @@ func NewQueueService(repo port.MaintenanceRepository, logger *slog.Logger) *Queu
 func (s *QueueService) ListQueued(ctx context.Context) ([]*domain.Maintenance, error) {
 	items, err := s.repo.ListByStatus(ctx, domain.MaintenanceStatusQueued)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to list queued maintenances",
+		s.logger.ErrorContext(ctx, "maintenance_queue_query_failed",
 			slog.String("error", err.Error()),
 		)
 		return nil, fmt.Errorf("listing queued maintenances: %w", err)
