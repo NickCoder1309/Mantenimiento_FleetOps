@@ -47,11 +47,21 @@ func (h *MaintenanceHandler) CreateCorrective(w http.ResponseWriter, r *http.Req
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		h.respondError(w, http.StatusBadRequest, "invalid_json", "Request body must be valid JSON")
+		h.logger.WarnContext(r.Context(), "invalid_json_request",
+			slog.String("endpoint", r.URL.Path),
+			slog.String("method", r.Method),
+			slog.String("error", err.Error()),
+		)
 		return
 	}
 
 	// Step 4: HTTP Handler validates the received data
 	if err := req.Validate(); err != nil {
+		h.logger.WarnContext(r.Context(), "request_validation_failed",
+			slog.String("endpoint", r.URL.Path),
+			slog.String("method", r.Method),
+			slog.String("error", err.Error()),
+		)
 		h.respondError(w, http.StatusBadRequest, "validation_error", err.Error())
 		return
 	}
@@ -96,6 +106,9 @@ func (h *MaintenanceHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	idParam := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idParam)
 	if err != nil {
+		h.logger.WarnContext(r.Context(), "invalid_maintenance_id",
+		 	slog.String("supplied_id", idParam),
+		)
 		h.respondError(w, http.StatusBadRequest, "invalid_id", "ID must be a valid UUID")
 		return
 	}

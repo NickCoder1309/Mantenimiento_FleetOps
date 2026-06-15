@@ -50,7 +50,7 @@ func (s *QueueService) ListQueued(ctx context.Context) ([]*domain.Maintenance, e
 func (s *QueueService) ListInProgress(ctx context.Context) ([]*domain.Maintenance, error) {
 	items, err := s.repo.ListByStatus(ctx, domain.MaintenanceStatusInProgress)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to list in-progress maintenances",
+		s.logger.ErrorContext(ctx, "maintenance_in_progress_query_failed",
 			slog.String("error", err.Error()),
 		)
 		return nil, fmt.Errorf("listing in-progress maintenances: %w", err)
@@ -62,7 +62,7 @@ func (s *QueueService) ListInProgress(ctx context.Context) ([]*domain.Maintenanc
 func (s *QueueService) ListAll(ctx context.Context) ([]*domain.Maintenance, error) {
 	items, err := s.repo.List(ctx)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to list all maintenances",
+		s.logger.ErrorContext(ctx, "maintenance_list_query_failed",
 			slog.String("error", err.Error()),
 		)
 		return nil, fmt.Errorf("listing all maintenances: %w", err)
@@ -74,7 +74,7 @@ func (s *QueueService) ListAll(ctx context.Context) ([]*domain.Maintenance, erro
 func (s *QueueService) GetByID(ctx context.Context, id uuid.UUID) (*domain.Maintenance, error) {
 	m, err := s.repo.GetByID(ctx, id)
 	if err != nil {
-		s.logger.WarnContext(ctx, "failed to get maintenance by ID",
+		s.logger.WarnContext(ctx, "maintenance_by_id_query_failed",
 			slog.String("maintenance_id", id.String()),
 			slog.String("error", err.Error()),
 		)

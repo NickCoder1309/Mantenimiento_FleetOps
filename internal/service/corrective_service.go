@@ -70,9 +70,8 @@ func (s *CorrectiveMaintenanceService) CreateCorrective(
 		slog.String("maintenance_id", maintenance.ID.String()),
 		slog.String("vehicle_id", vehicleID.String()),
 		slog.String("incident_id", incidentID.String()),
-		slog.String("user_id", ctx.),
 		slog.Uint64("severity", uint64(severity)),
-		slog.String("status", maintenance.Status.String()),
+		slog.String("status", string(maintenance.Status)),
 	)
 
 	return maintenance, nil
