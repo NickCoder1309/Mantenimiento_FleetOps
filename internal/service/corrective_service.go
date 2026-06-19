@@ -49,11 +49,6 @@ func (s *CorrectiveMaintenanceService) CreateCorrective(
 	// Step 5: Create the corrective maintenance domain entity
 	maintenance, err := domain.NewCorrectiveMaintenance(vehicleID, incidentID, severity)
 	if err != nil {
-		s.logger.WarnContext(ctx, "maintenance_validation_failed",
-			slog.String("vehicle_id", vehicleID.String()),
-			slog.String("incident_id", incidentID.String()),
-			slog.String("reason", err.Error()),
-		)
 		return nil, fmt.Errorf("creating corrective maintenance: %w", err)
 	}
 

@@ -48,6 +48,7 @@ func (h *MaintenanceHandler) CreateCorrective(w http.ResponseWriter, r *http.Req
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		h.respondError(w, http.StatusBadRequest, "invalid_json", "Request body must be valid JSON")
 		h.logger.WarnContext(r.Context(), "invalid_json_request",
+			slog.String("remote_addr", r.RemoteAddr),
 			slog.String("endpoint", r.URL.Path),
 			slog.String("method", r.Method),
 			slog.String("error", err.Error()),
@@ -58,6 +59,7 @@ func (h *MaintenanceHandler) CreateCorrective(w http.ResponseWriter, r *http.Req
 	// Step 4: HTTP Handler validates the received data
 	if err := req.Validate(); err != nil {
 		h.logger.WarnContext(r.Context(), "request_validation_failed",
+			slog.String("remote_addr", r.RemoteAddr),
 			slog.String("endpoint", r.URL.Path),
 			slog.String("method", r.Method),
 			slog.String("error", err.Error()),
@@ -107,6 +109,9 @@ func (h *MaintenanceHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(idParam)
 	if err != nil {
 		h.logger.WarnContext(r.Context(), "invalid_maintenance_id",
+			slog.String("remote_addr", r.RemoteAddr),
+			slog.String("endpoint", r.URL.Path),
+			slog.String("method", r.Method),
 		 	slog.String("supplied_id", idParam),
 		)
 		h.respondError(w, http.StatusBadRequest, "invalid_id", "ID must be a valid UUID")
