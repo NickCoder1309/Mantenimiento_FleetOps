@@ -10,7 +10,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -22,7 +21,6 @@ import (
 	"github.com/fleetops/maintenance/internal/handler"
 	"github.com/fleetops/maintenance/internal/platform/config"
 	"github.com/fleetops/maintenance/internal/platform/database"
-	"github.com/fleetops/maintenance/internal/platform/logger"
 	"github.com/fleetops/maintenance/internal/service"
 )
 
@@ -34,24 +32,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Initialize structured logger
-	log := logger.New(cfg.LogLevel)
-	slog.SetDefault(log)
-
-	log.Info("starting FleetOps Maintenance Microservice",
-		slog.String("port", cfg.ServerPort),
-		slog.String("log_level", cfg.LogLevel),
-	)
-
 	// Initialize database connection pool
 	ctx := context.Background()
 	pool, err := database.NewPostgresPool(ctx, cfg.DatabaseURL, cfg.DatabaseMaxConns)
 	if err != nil {
-		log.Error("failed to connect to database", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
 	defer pool.Close()
-	log.Info("database connection established")
 
 	// =========================================================================
 	// Dependency Injection — Composition Root
@@ -63,24 +50,24 @@ func main() {
 	vehicleClient := client.NewHTTPVehicleClient(cfg.VehiclesServiceURL, cfg.HTTPClientTimeoutSecs)
 
 	// Business Logic Layer: Services (depend on Port interfaces)
-	correctiveSvc := service.NewCorrectiveMaintenanceService(maintenanceRepo, log)
+	correctiveSvc := service.NewCorrectiveMaintenanceService(maintenanceRepo)
 	preventiveSvc := service.NewPreventiveMaintenanceService(
 		maintenanceRepo, vehicleClient,
 		cfg.PreventiveKmThreshold, cfg.PreventiveDaysThreshold,
-		cfg.CronIntervalDays, log,
+		cfg.CronIntervalDays,
 	)
-	queueSvc := service.NewQueueService(maintenanceRepo, log)
+	queueSvc := service.NewQueueService(maintenanceRepo)
 	workerPool := service.NewWorkerPool(
 		maintenanceRepo, vehicleClient,
-		cfg.MaxWorkers, cfg.WorkerPollIntervalSecs, log,
+		cfg.MaxWorkers, cfg.WorkerPollIntervalSecs,
 	)
 
 	// Presentation Layer: Handlers (depend on Services)
-	maintenanceHandler := handler.NewMaintenanceHandler(correctiveSvc, queueSvc, log)
+	maintenanceHandler := handler.NewMaintenanceHandler(correctiveSvc, queueSvc)
 	healthHandler := handler.NewHealthHandler(pool)
 
 	// Router
-	router := handler.NewRouter(maintenanceHandler, healthHandler, log, cfg.MetricsEnabled)
+	router := handler.NewRouter(maintenanceHandler, healthHandler, cfg.MetricsEnabled)
 
 	// =========================================================================
 	// Start background services
@@ -111,23 +98,17 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		log.Info("HTTP server listening", slog.String("addr", server.Addr))
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Error("HTTP server error", slog.String("error", err.Error()))
 			os.Exit(1)
 		}
 	}()
 
 	<-quit
-	log.Info("shutdown signal received, draining connections...")
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	if err := server.Shutdown(shutdownCtx); err != nil {
-		log.Error("server forced shutdown", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
-
-	log.Info("FleetOps Maintenance Microservice stopped gracefully")
 }

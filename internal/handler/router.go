@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"log/slog"
-
 	"github.com/go-chi/chi/v5"
 	chimiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -27,7 +25,6 @@ import (
 func NewRouter(
 	maintenanceHandler *MaintenanceHandler,
 	healthHandler *HealthHandler,
-	logger *slog.Logger,
 	metricsEnabled bool,
 ) *chi.Mux {
 	r := chi.NewRouter()
@@ -35,7 +32,7 @@ func NewRouter(
 	// Global middleware
 	r.Use(chimiddleware.RequestID)
 	r.Use(chimiddleware.RealIP)
-	r.Use(middleware.Recovery(logger))
+	r.Use(middleware.Recovery())
 
 	// Health check — outside versioned API
 	r.Get("/health", healthHandler.Check)

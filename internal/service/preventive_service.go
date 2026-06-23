@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"sync"
 	"time"
 
@@ -23,7 +22,6 @@ type PreventiveMaintenanceService struct {
 	kmThreshold     float64
 	daysThreshold   int
 	intervalDays    int
-	logger          *slog.Logger
 	stopCh          chan struct{}
 	stopped         sync.Once
 }
@@ -38,7 +36,6 @@ func NewPreventiveMaintenanceService(
 	kmThreshold float64,
 	daysThreshold int,
 	intervalDays int,
-	logger *slog.Logger,
 ) *PreventiveMaintenanceService {
 	return &PreventiveMaintenanceService{
 		repo:          repo,
@@ -46,7 +43,6 @@ func NewPreventiveMaintenanceService(
 		kmThreshold:   kmThreshold,
 		daysThreshold: daysThreshold,
 		intervalDays:  intervalDays,
-		logger:        logger,
 		stopCh:        make(chan struct{}),
 	}
 }
@@ -61,15 +57,8 @@ func (s *PreventiveMaintenanceService) SchedulePreventive(ctx context.Context) (
 	// Steps 2-3: Fetch vehicles from external service via ACL
 	vehicles, err := s.vehicleClient.GetAllVehicles(ctx)
 	if err != nil {
-		s.logger.ErrorContext(ctx, "failed to fetch vehicles for preventive scheduling",
-			slog.String("error", err.Error()),
-		)
 		return nil, fmt.Errorf("fetching vehicles: %w", err)
 	}
-
-	s.logger.InfoContext(ctx, "fetched vehicles for preventive evaluation",
-		slog.Int("total_vehicles", len(vehicles)),
-	)
 
 	// Step 4: Filter vehicles based on thresholds
 	var created []*domain.Maintenance
@@ -81,29 +70,16 @@ func (s *PreventiveMaintenanceService) SchedulePreventive(ctx context.Context) (
 		// Step 5: Generate preventive maintenance record
 		m, err := domain.NewPreventiveMaintenance(v.ID)
 		if err != nil {
-			s.logger.WarnContext(ctx, "failed to create preventive maintenance",
-				slog.String("vehicle_id", v.ID.String()),
-				slog.String("error", err.Error()),
-			)
 			continue
 		}
 
 		// Steps 6-7: Persist via Repository
 		if err := s.repo.Create(ctx, m); err != nil {
-			s.logger.ErrorContext(ctx, "failed to persist preventive maintenance",
-				slog.String("maintenance_id", m.ID.String()),
-				slog.String("error", err.Error()),
-			)
 			continue
 		}
 
 		created = append(created, m)
 	}
-
-	s.logger.InfoContext(ctx, "preventive maintenance scheduling completed",
-		slog.Int("vehicles_evaluated", len(vehicles)),
-		slog.Int("maintenances_created", len(created)),
-	)
 
 	return created, nil
 }
@@ -117,25 +93,16 @@ func (s *PreventiveMaintenanceService) Start(ctx context.Context) {
 	interval := time.Duration(s.intervalDays) * 24 * time.Hour
 	ticker := time.NewTicker(interval)
 
-	s.logger.Info("preventive maintenance scheduler started",
-		slog.Int("interval_days", s.intervalDays),
-	)
-
 	go func() {
 		defer ticker.Stop()
 		for {
 			select {
 			case <-ticker.C:
 				if _, err := s.SchedulePreventive(ctx); err != nil {
-					s.logger.ErrorContext(ctx, "preventive scheduling cycle failed",
-						slog.String("error", err.Error()),
-					)
 				}
 			case <-s.stopCh:
-				s.logger.Info("preventive maintenance scheduler stopped")
 				return
 			case <-ctx.Done():
-				s.logger.Info("preventive maintenance scheduler context cancelled")
 				return
 			}
 		}

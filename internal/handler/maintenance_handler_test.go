@@ -2,14 +2,12 @@ package handler_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
-	"log/slog"
 	"net/http"
 	"net/http/httptest"
-	"io"
 	"testing"
-	"context"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -24,16 +22,11 @@ import (
 	"github.com/fleetops/maintenance/internal/service"
 )
 
-func testLogger() *slog.Logger {
-	return slog.New(slog.NewTextHandler(io.Discard, nil))
-}
-
 func setupHandler() (*handler.MaintenanceHandler, *mocks.MockMaintenanceRepository) {
 	repo := new(mocks.MockMaintenanceRepository)
-	logger := testLogger()
-	correctiveSvc := service.NewCorrectiveMaintenanceService(repo, logger)
-	queueSvc := service.NewQueueService(repo, logger)
-	h := handler.NewMaintenanceHandler(correctiveSvc, queueSvc, logger)
+	correctiveSvc := service.NewCorrectiveMaintenanceService(repo)
+	queueSvc := service.NewQueueService(repo)
+	h := handler.NewMaintenanceHandler(correctiveSvc, queueSvc)
 	return h, repo
 }
 

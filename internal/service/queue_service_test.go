@@ -22,7 +22,7 @@ import (
 func TestListQueued_Success(t *testing.T) {
 	// Arrange
 	repo := new(mocks.MockMaintenanceRepository)
-	svc := service.NewQueueService(repo, newTestLogger())
+	svc := service.NewQueueService(repo)
 
 	expected := []*domain.Maintenance{
 		{ID: uuid.New(), Status: domain.MaintenanceStatusQueued},
@@ -42,7 +42,7 @@ func TestListQueued_Success(t *testing.T) {
 func TestListQueued_RepositoryError(t *testing.T) {
 	// Arrange
 	repo := new(mocks.MockMaintenanceRepository)
-	svc := service.NewQueueService(repo, newTestLogger())
+	svc := service.NewQueueService(repo)
 
 	repo.On("ListByStatus", mock.Anything, domain.MaintenanceStatusQueued).
 		Return(nil, errors.New("db error"))
@@ -62,7 +62,7 @@ func TestListQueued_RepositoryError(t *testing.T) {
 func TestListInProgress_Success(t *testing.T) {
 	// Arrange
 	repo := new(mocks.MockMaintenanceRepository)
-	svc := service.NewQueueService(repo, newTestLogger())
+	svc := service.NewQueueService(repo)
 
 	expected := []*domain.Maintenance{
 		{ID: uuid.New(), Status: domain.MaintenanceStatusInProgress},
@@ -80,7 +80,7 @@ func TestListInProgress_Success(t *testing.T) {
 func TestListInProgress_RepositoryError(t *testing.T) {
 	// Arrange
 	repo := new(mocks.MockMaintenanceRepository)
-	svc := service.NewQueueService(repo, newTestLogger())
+	svc := service.NewQueueService(repo)
 
 	repo.On("ListByStatus", mock.Anything, domain.MaintenanceStatusInProgress).
 		Return(nil, errors.New("db error"))
@@ -100,7 +100,7 @@ func TestListInProgress_RepositoryError(t *testing.T) {
 func TestListAll_Success(t *testing.T) {
 	// Arrange
 	repo := new(mocks.MockMaintenanceRepository)
-	svc := service.NewQueueService(repo, newTestLogger())
+	svc := service.NewQueueService(repo)
 
 	expected := []*domain.Maintenance{
 		{ID: uuid.New(), Status: domain.MaintenanceStatusQueued},
@@ -119,7 +119,7 @@ func TestListAll_Success(t *testing.T) {
 func TestListAll_RepositoryError(t *testing.T) {
 	// Arrange
 	repo := new(mocks.MockMaintenanceRepository)
-	svc := service.NewQueueService(repo, newTestLogger())
+	svc := service.NewQueueService(repo)
 
 	repo.On("List", mock.Anything).Return(nil, errors.New("db error"))
 
@@ -138,7 +138,7 @@ func TestListAll_RepositoryError(t *testing.T) {
 func TestGetByID_Success(t *testing.T) {
 	// Arrange
 	repo := new(mocks.MockMaintenanceRepository)
-	svc := service.NewQueueService(repo, newTestLogger())
+	svc := service.NewQueueService(repo)
 
 	id := uuid.New()
 	expected := &domain.Maintenance{ID: id, Status: domain.MaintenanceStatusQueued}
@@ -155,7 +155,7 @@ func TestGetByID_Success(t *testing.T) {
 func TestGetByID_NotFound(t *testing.T) {
 	// Arrange
 	repo := new(mocks.MockMaintenanceRepository)
-	svc := service.NewQueueService(repo, newTestLogger())
+	svc := service.NewQueueService(repo)
 
 	id := uuid.New()
 	repo.On("GetByID", mock.Anything, id).Return(nil, domain.ErrMaintenanceNotFound)
@@ -172,7 +172,7 @@ func TestGetByID_NotFound(t *testing.T) {
 func TestGetByID_RepositoryError(t *testing.T) {
 	// Arrange
 	repo := new(mocks.MockMaintenanceRepository)
-	svc := service.NewQueueService(repo, newTestLogger())
+	svc := service.NewQueueService(repo)
 
 	id := uuid.New()
 	repo.On("GetByID", mock.Anything, id).Return(nil, errors.New("db error"))

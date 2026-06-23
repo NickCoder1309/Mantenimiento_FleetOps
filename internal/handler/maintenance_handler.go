@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"errors"
-	"log/slog"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -21,19 +20,16 @@ import (
 type MaintenanceHandler struct {
 	correctiveSvc *service.CorrectiveMaintenanceService
 	queueSvc      *service.QueueService
-	logger        *slog.Logger
 }
 
 // NewMaintenanceHandler constructs a MaintenanceHandler with injected services.
 func NewMaintenanceHandler(
 	correctiveSvc *service.CorrectiveMaintenanceService,
 	queueSvc *service.QueueService,
-	logger *slog.Logger,
 ) *MaintenanceHandler {
 	return &MaintenanceHandler{
 		correctiveSvc: correctiveSvc,
 		queueSvc:      queueSvc,
-		logger:        logger,
 	}
 }
 
@@ -144,9 +140,7 @@ func (h *MaintenanceHandler) GetQueueSummary(w http.ResponseWriter, r *http.Requ
 func (h *MaintenanceHandler) respondJSON(w http.ResponseWriter, code int, data any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	if err := json.NewEncoder(w).Encode(data); err != nil {
-		h.logger.Error("failed to encode response", slog.String("error", err.Error()))
-	}
+	_ = json.NewEncoder(w).Encode(data)
 }
 
 // respondError writes a structured error response.

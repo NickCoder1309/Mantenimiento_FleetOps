@@ -24,7 +24,7 @@ func TestSchedulePreventive_Success_FiltersAndCreates(t *testing.T) {
 	repo := new(mocks.MockMaintenanceRepository)
 	vehicleClient := new(mocks.MockVehicleClient)
 	svc := service.NewPreventiveMaintenanceService(
-		repo, vehicleClient, 10000, 90, 7, newTestLogger(),
+		repo, vehicleClient, 10000, 90, 7,
 	)
 
 	vehicles := []*domain.Vehicle{
@@ -56,7 +56,7 @@ func TestSchedulePreventive_NoVehiclesQualify(t *testing.T) {
 	repo := new(mocks.MockMaintenanceRepository)
 	vehicleClient := new(mocks.MockVehicleClient)
 	svc := service.NewPreventiveMaintenanceService(
-		repo, vehicleClient, 10000, 90, 7, newTestLogger(),
+		repo, vehicleClient, 10000, 90, 7,
 	)
 
 	vehicles := []*domain.Vehicle{
@@ -79,7 +79,7 @@ func TestSchedulePreventive_VehicleClientError(t *testing.T) {
 	repo := new(mocks.MockMaintenanceRepository)
 	vehicleClient := new(mocks.MockVehicleClient)
 	svc := service.NewPreventiveMaintenanceService(
-		repo, vehicleClient, 10000, 90, 7, newTestLogger(),
+		repo, vehicleClient, 10000, 90, 7,
 	)
 
 	vehicleClient.On("GetAllVehicles", mock.Anything).Return(nil, errors.New("connection refused"))
@@ -98,7 +98,7 @@ func TestSchedulePreventive_RepositoryError_ContinuesProcessing(t *testing.T) {
 	repo := new(mocks.MockMaintenanceRepository)
 	vehicleClient := new(mocks.MockVehicleClient)
 	svc := service.NewPreventiveMaintenanceService(
-		repo, vehicleClient, 10000, 90, 7, newTestLogger(),
+		repo, vehicleClient, 10000, 90, 7,
 	)
 
 	vehicles := []*domain.Vehicle{
@@ -127,7 +127,7 @@ func TestSchedulePreventive_EmptyVehicleList(t *testing.T) {
 	repo := new(mocks.MockMaintenanceRepository)
 	vehicleClient := new(mocks.MockVehicleClient)
 	svc := service.NewPreventiveMaintenanceService(
-		repo, vehicleClient, 10000, 90, 7, newTestLogger(),
+		repo, vehicleClient, 10000, 90, 7,
 	)
 
 	vehicleClient.On("GetAllVehicles", mock.Anything).Return([]*domain.Vehicle{}, nil)

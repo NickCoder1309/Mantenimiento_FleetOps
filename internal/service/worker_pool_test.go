@@ -22,7 +22,7 @@ func TestWorkerPool_StartAndStop(t *testing.T) {
 	// Arrange
 	repo := new(mocks.MockMaintenanceRepository)
 	vehicleClient := new(mocks.MockVehicleClient)
-	wp := service.NewWorkerPool(repo, vehicleClient, 3, 1, newTestLogger())
+	wp := service.NewWorkerPool(repo, vehicleClient, 3, 1)
 
 	// Act — start and immediately stop, should not panic
 	ctx, cancel := context.WithCancel(context.Background())
@@ -40,7 +40,7 @@ func TestWorkerPool_StopIsIdempotent(t *testing.T) {
 	// Arrange
 	repo := new(mocks.MockMaintenanceRepository)
 	vehicleClient := new(mocks.MockVehicleClient)
-	wp := service.NewWorkerPool(repo, vehicleClient, 3, 60, newTestLogger())
+	wp := service.NewWorkerPool(repo, vehicleClient, 3, 60)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -75,7 +75,7 @@ func TestWorkerPool_ProcessesQueuedItems(t *testing.T) {
 		Return(nil)
 
 	// Act — use short poll interval to trigger quickly
-	wp := service.NewWorkerPool(repo, vehicleClient, 2, 1, newTestLogger())
+	wp := service.NewWorkerPool(repo, vehicleClient, 2, 1)
 	ctx, cancel := context.WithCancel(context.Background())
 	wp.Start(ctx)
 
@@ -111,7 +111,7 @@ func TestWorkerPool_RespectsMaxWorkers(t *testing.T) {
 		Return(nil)
 
 	// Act — maxWorkers = 3, but 10 items; all should still be processed
-	wp := service.NewWorkerPool(repo, vehicleClient, 3, 1, newTestLogger())
+	wp := service.NewWorkerPool(repo, vehicleClient, 3, 1)
 	ctx, cancel := context.WithCancel(context.Background())
 	wp.Start(ctx)
 

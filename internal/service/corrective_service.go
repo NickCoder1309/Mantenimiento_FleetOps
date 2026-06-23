@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"log/slog"
 
 	"github.com/google/uuid"
 
@@ -17,8 +16,7 @@ import (
 // SAD Reference: Process Network 1 — "Registro de Mantenimiento Correctivo"
 // Pattern: Service Layer (PoEAA), Dependency Injection
 type CorrectiveMaintenanceService struct {
-	repo   port.MaintenanceRepository
-	logger *slog.Logger
+	repo port.MaintenanceRepository
 }
 
 // NewCorrectiveMaintenanceService constructs a CorrectiveMaintenanceService
@@ -27,11 +25,9 @@ type CorrectiveMaintenanceService struct {
 // Pattern: Dependency Injection (ADR-7)
 func NewCorrectiveMaintenanceService(
 	repo port.MaintenanceRepository,
-	logger *slog.Logger,
 ) *CorrectiveMaintenanceService {
 	return &CorrectiveMaintenanceService{
-		repo:   repo,
-		logger: logger,
+		repo: repo,
 	}
 }
 
@@ -49,29 +45,13 @@ func (s *CorrectiveMaintenanceService) CreateCorrective(
 	// Step 5: Create the corrective maintenance domain entity
 	maintenance, err := domain.NewCorrectiveMaintenance(vehicleID, incidentID, severity)
 	if err != nil {
-		s.logger.WarnContext(ctx, "failed to create corrective maintenance",
-			slog.String("vehicle_id", vehicleID.String()),
-			slog.String("incident_id", incidentID.String()),
-			slog.String("error", err.Error()),
-		)
 		return nil, fmt.Errorf("creating corrective maintenance: %w", err)
 	}
 
 	// Steps 6-7: Persist via Repository → PostgreSQL
 	if err := s.repo.Create(ctx, maintenance); err != nil {
-		s.logger.ErrorContext(ctx, "failed to persist corrective maintenance",
-			slog.String("maintenance_id", maintenance.ID.String()),
-			slog.String("error", err.Error()),
-		)
 		return nil, fmt.Errorf("persisting corrective maintenance: %w", err)
 	}
-
-	s.logger.InfoContext(ctx, "corrective maintenance created and queued",
-		slog.String("maintenance_id", maintenance.ID.String()),
-		slog.String("vehicle_id", vehicleID.String()),
-		slog.String("incident_id", incidentID.String()),
-		slog.Uint64("severity", uint64(severity)),
-	)
 
 	return maintenance, nil
 }

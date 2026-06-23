@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"log/slog"
 
 	"github.com/google/uuid"
 
@@ -16,18 +15,14 @@ import (
 // SAD Reference: Process Network 3 — "Consulta de Cola de Mantenimientos"
 // Pattern: Service Layer (PoEAA)
 type QueueService struct {
-	repo   port.MaintenanceRepository
-	logger *slog.Logger
+	repo port.MaintenanceRepository
 }
 
 // NewQueueService constructs a QueueService with its dependencies injected.
 //
 // Pattern: Dependency Injection (ADR-7)
-func NewQueueService(repo port.MaintenanceRepository, logger *slog.Logger) *QueueService {
-	return &QueueService{
-		repo:   repo,
-		logger: logger,
-	}
+func NewQueueService(repo port.MaintenanceRepository) *QueueService {
+	return &QueueService{repo: repo}
 }
 
 // ListQueued retrieves all maintenance records currently in the queue.

@@ -3,8 +3,6 @@ package service_test
 import (
 	"context"
 	"errors"
-	"log/slog"
-	"io"
 	"testing"
 
 	"github.com/google/uuid"
@@ -17,10 +15,6 @@ import (
 	"github.com/fleetops/maintenance/internal/service"
 )
 
-func newTestLogger() *slog.Logger {
-	return slog.New(slog.NewTextHandler(io.Discard, nil))
-}
-
 // =============================================================================
 // CreateCorrective tests
 // =============================================================================
@@ -28,7 +22,7 @@ func newTestLogger() *slog.Logger {
 func TestCreateCorrective_Success(t *testing.T) {
 	// Arrange
 	repo := new(mocks.MockMaintenanceRepository)
-	svc := service.NewCorrectiveMaintenanceService(repo, newTestLogger())
+	svc := service.NewCorrectiveMaintenanceService(repo)
 
 	vehicleID := uuid.New()
 	incidentID := uuid.New()
@@ -53,7 +47,7 @@ func TestCreateCorrective_Success(t *testing.T) {
 func TestCreateCorrective_InvalidVehicleID(t *testing.T) {
 	// Arrange
 	repo := new(mocks.MockMaintenanceRepository)
-	svc := service.NewCorrectiveMaintenanceService(repo, newTestLogger())
+	svc := service.NewCorrectiveMaintenanceService(repo)
 
 	// Act
 	m, err := svc.CreateCorrective(context.Background(), uuid.Nil, uuid.New(), 5)
@@ -68,7 +62,7 @@ func TestCreateCorrective_InvalidVehicleID(t *testing.T) {
 func TestCreateCorrective_InvalidIncidentID(t *testing.T) {
 	// Arrange
 	repo := new(mocks.MockMaintenanceRepository)
-	svc := service.NewCorrectiveMaintenanceService(repo, newTestLogger())
+	svc := service.NewCorrectiveMaintenanceService(repo)
 
 	// Act
 	m, err := svc.CreateCorrective(context.Background(), uuid.New(), uuid.Nil, 5)
@@ -83,7 +77,7 @@ func TestCreateCorrective_InvalidIncidentID(t *testing.T) {
 func TestCreateCorrective_InvalidSeverity(t *testing.T) {
 	// Arrange
 	repo := new(mocks.MockMaintenanceRepository)
-	svc := service.NewCorrectiveMaintenanceService(repo, newTestLogger())
+	svc := service.NewCorrectiveMaintenanceService(repo)
 
 	// Act
 	m, err := svc.CreateCorrective(context.Background(), uuid.New(), uuid.New(), 0)
@@ -98,7 +92,7 @@ func TestCreateCorrective_InvalidSeverity(t *testing.T) {
 func TestCreateCorrective_RepositoryError(t *testing.T) {
 	// Arrange
 	repo := new(mocks.MockMaintenanceRepository)
-	svc := service.NewCorrectiveMaintenanceService(repo, newTestLogger())
+	svc := service.NewCorrectiveMaintenanceService(repo)
 
 	dbErr := errors.New("database connection lost")
 	repo.On("Create", mock.Anything, mock.AnythingOfType("*domain.Maintenance")).Return(dbErr)

@@ -124,11 +124,10 @@ fleetops-maintenance/
 │   │   ├── maintenance_handler.go ··· REST endpoint handlers
 │   │   ├── health_handler.go ········ Health check handler
 │   │   ├── dto/ ····················· Request/Response DTOs
-│   │   └── middleware/ ·············· Logging & recovery middleware
+│   │   └── middleware/ ·············· Recovery middleware
 │   ├── platform/ ···················· Cross-Cutting Concerns
 │   │   ├── config/ ·················· Environment configuration
 │   │   ├── database/ ················ PostgreSQL connection pool
-│   │   └── logger/ ·················· Structured logging (slog)
 │   └── mocks/ ······················· Test mocks (testify/mock)
 ├── migrations/ ······················ Database schema migrations
 ├── .github/workflows/ci.yml ·········· CI pipeline (lint, test, build)
@@ -157,7 +156,6 @@ fleetops-maintenance/
 | ADR-10 | Prometheus + Grafana | Centralized Monitoring | Observability |
 | ADR-11 | API Gateway (external) | API Gateway | Routing & auth |
 | Conv. | golang-migrate | Migration Management | Schema evolution |
-| Conv. | slog structured logging | Structured Logging | Analysability |
 | Conv. | Anti-Corruption Layer | ACL (DDD) | External service isolation |
 
 ---
