@@ -42,9 +42,6 @@ The service will be available at:
 - **API**: `http://localhost:8080/api/v1/mantenimientos`
 - **Health**: `http://localhost:8080/health`
 - **Metrics**: `http://localhost:8080/metrics`
-- **Prometheus**: `http://localhost:9090`
-- **Grafana**: `http://localhost:3000` (admin/admin)
-
 ---
 
 ## API Endpoints
@@ -56,7 +53,6 @@ The service will be available at:
 | `GET` | `/api/v1/mantenimientos/{id}` | Get maintenance by ID | — |
 | `GET` | `/api/v1/mantenimientos/cola` | Queue summary (queued + in-progress) | Process Network 3 |
 | `GET` | `/health` | Health check | Convention |
-| `GET` | `/metrics` | Prometheus metrics | ADR-10 |
 
 ### Example: Create Corrective Maintenance
 
