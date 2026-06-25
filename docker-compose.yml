@@ -22,7 +22,11 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-maintenance} -d ${POSTGRES_DB:-maintenance_db}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-maintenance} -d ${POSTGRES_DB:-maintenance_db}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -78,7 +82,6 @@ services:
       start_period: 15s
     networks:
       - fleetops-net
-
 
 # Named volumes for data persistence (Rule R4)
 volumes:
